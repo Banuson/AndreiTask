@@ -1,0 +1,134 @@
+<!-- sldsValidatorIgnore -->
+<template>
+  <!-- Notification -->
+  <c-task_lcp_notification></c-task_lcp_notification>
+
+  <!-- Header -->
+  <div class="slds-grid">
+    <h1 class="slds-col slds-size_1-of-4">Accounts</h1>
+    <h2 class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_8-of-12">Related Contacts</h2>
+  </div>
+
+  <!-- Body -->
+  <div class="slds-grid container">
+    <!-- Account List -->
+    <div class="slds-col slds-size_1-of-4 hide-scroll">
+      <div class="slds-grid slds-grid_vertical custom-list">
+        <template for:each={tableData} for:item="account">
+          <div class="slds-col slds-var-m-around_xxx-small" key={account.Id}>
+            <article class="slds-card" data-card={account.Id}>
+              <div class="slds-card__header slds-grid">
+                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                  <div class="slds-media__figure">
+                    <span class="slds-icon_container slds-icon-standard-account" title="account">
+                      <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                        <use xlink:href="/assets/icons/standard-sprite/svg/symbols.svg#account"></use>
+                      </svg>
+                    </span>
+                  </div>
+                  <div class="slds-media__body">
+                    <h3 class="slds-card__header-title">
+                      <span>{account.Name}</span>
+                    </h3>
+                  </div>
+                  <lightning-icon class="cursor" icon-name='utility:send' alternative-text='send' size='small'
+                    title='send' data-recordid={account.Id} onclick={handleClick}></lightning-icon>
+                </header>
+              </div>
+              <div class="slds-card__body slds-card__body_inner slds-grid slds-wrap">
+                <div class="slds-form-element slds-form-element_readonly slds-col">
+                  <span class="slds-form-element__label slds-text-body_small">Annual Revenue</span>
+                  <div class="slds-form-element__control">
+                    <div class="slds-form-element__static slds-text-body_small" type="currency">
+                      <lightning-formatted-number value={account.AnnualRevenue} maximum-fraction-digits="0"
+                        format-style="currency" currency-code="USD"></lightning-formatted-number>
+                    </div>
+                  </div>
+                </div>
+                <div class="slds-form-element slds-form-element_readonly slds-col">
+                  <span class="slds-form-element__label slds-text-body_small">Industry</span>
+                  <div class="slds-form-element__control">
+                    <div class="slds-form-element__static slds-text-body_small">{account.Industry}</div>
+                  </div>
+                </div>
+                <div class="slds-col slds-size_1-of-1 custom-footer">
+
+                  <template if:true={account.BillingAddress}>
+                    <div class="slds-form-element__static slds-text-body_small">{account.BillingAddress.street}</div>
+                  </template>
+                </div>
+              </div>
+            </article>
+          </div>
+        </template>
+      </div>
+    </div>
+    <!-- Related Contacts Datatable -->
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_8-of-12">
+      <!-- Confidential Overlay -->
+      <template if:false={showData}>
+        <div class="custom-overlay slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_8-of-12">
+          Confidential
+        </div>
+      </template>
+            <!-- Spinner -->
+      <template if:true={loader}>
+        <div class="loader-container">
+          <lightning-spinner class="loader" alternative-text="Loading" size="medium" variant="brand">
+          </lightning-spinner>
+        </div>
+      </template>
+      <!-- Related Contacts Datatable -->
+      <template if:false={loader}>
+        <div class={tableClasses}>
+          <lightning-datatable key-field="Id" data={selectedRecords} columns={columns} onsave={handleSave}
+            draft-values={saveDraftValues} hide-checkbox-column resize-column-disabled>
+          </lightning-datatable>
+
+          <!-- Paginator -->
+          <div class="slds-align_absolute-center slds-var-p-around_small">
+            <div class="slds-p-right_xx-small">
+              <lightning-button class="custom-button" label="Previous" disabled={isPrev} onclick={handlePrev}
+                variant="brand" icon-name="utility:chevronleft" name="prev"></lightning-button>
+            </div>
+            <span class="slds-badge slds-badge_lightest custom-badge">
+              {recordStart}-{recordEnd} of {totalRecords} | Page {pageNumber} of {totalPages}
+            </span>
+            <div class="slds-p-left_xx-small">
+              <lightning-button class="custom-button" label="Next" disabled={isNext} onclick={handleNext}
+                variant="brand" icon-name="utility:chevronright" icon-position="right" name="next"></lightning-button>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- Access Request Modal -->
+  <template if:true={showModal}>
+    <section class="slds-modal slds-fade-in-open">
+      <div class="slds-modal__container">
+        <div class="slds-modal__header">
+          <h3 class="slds-modal__title slds-hyphenate">Access Request</h3>
+        </div>
+        <div class="slds-modal__content slds-p-around_medium">
+          <p class="slds-var-m-bottom_x-small">Access Requirements:</p>
+          <ol class="access-requirements">
+            <li> <strong>Authorized Personnel Only </strong>: Access limited to authorized individuals.</li>
+            <li> <strong>Need-to-Know Basis</strong>: Information accessed on a need-to-know basis.</li>
+            <li> <strong>Confidentiality Agreement </strong>: By accessing, you agree to maintain strict
+              confidentiality.</li>
+            <li> <strong>Security Measures</strong>: Modal is secured for data protection.</li>
+          </ol>
+          <p class="slds-var-m-top_x-small">Unauthorized access or misuse may result in consequences.</p>
+        </div>
+        <div class="slds-modal__footer">
+          <button class="slds-button slds-button_neutral" onclick={handleCancel}>Cancel</button>
+          <button class="slds-button slds-button_brand" onclick={handleContinue}>Continue</button>
+        </div>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+  </template>
+
+</template>

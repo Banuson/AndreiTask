@@ -1,0 +1,27 @@
+
+.custom-blue{
+    background:#D4F1F4;
+}
+.custom-row-number{
+    font-size:11px;
+}
+.custom-table table{
+    background: #fff;
+   
+}
+
+.custom-table table.slds-table .slds-row-number:after {
+    content: none !important;
+}
+.slds-has-button-menu .slds-th__action-button {
+	display: none;
+}
+.slds-has-button-menu .slds-th__action{
+    padding-right:0!important;
+}
+
+.slds-table tr th:first-child{
+
+    width:0 !important;
+
+}
